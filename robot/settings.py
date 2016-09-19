@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'robot.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Yisouspider'
+USER_AGENT = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.76 Mobile Safari/537.36'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
