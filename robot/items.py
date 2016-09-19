@@ -13,5 +13,6 @@ class RobotItem(scrapy.Item):
     # name = scrapy.Field()
     title = scrapy.Field()
     commentCount = scrapy.Field()
-    starCount = scrapy.Field()
+    voteCount = scrapy.Field()
     content = scrapy.Field()
+    link = scrapy.Field()
