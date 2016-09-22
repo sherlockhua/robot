@@ -13,12 +13,12 @@ class QiuShiBaiKeSpider(BaseSpider):
 
     name = "QiuShiBaiKe"
     allowed_domains = ["www.qiushibaike.com"]
-    start_urls = ["http://www.qiushibaike.com/hot/"]
+    start_urls = ["http://www.qiushibaike.com/history/"]
+    host = "http://www.qiushibaike.com"
 
     def parse(self, response):
 
         sel = Selector(response)
-        items = []
         contents = sel.xpath('//div[@class="article block untagged mb15"]')
         for content in contents:
             item = RobotItem()
@@ -26,7 +26,19 @@ class QiuShiBaiKeSpider(BaseSpider):
             item['content'] = result[0]
             item['voteCount'] = content.xpath('.//div[@class="stats"]/span[@class="stats-vote"]/i/text()').extract()[0]
             item['link'] = content.xpath('.//a[@class="contentHerf"]/@href').extract()[0]
-            item['commentCount'] = content.xpath('.//div[@class="stats"]/span[@class="stats-comments"]/a/i/text()').extract()[0]
-            items.append(item)
+            count = content.xpath('.//div[@class="stats"]/span[@class="stats-comments"]/a/i/text()').extract()
+            item['commentCount'] = 0
+            if count:
+                item['commentCount'] = count[0]
+            yield item
 
-        return items
+        sellink = Selector(response)
+        pages = sellink.xpath('//ul[@class="pagination"]/li')
+        for page in pages:
+            link = page.xpath('.//a/@href').extract()
+            if link:
+                yield Request(self.host + link[0], callback=self.parse)
+
+        next_day = sellink.xpath('//div[@class="history-nv mb15 clearfix"]/a/@href').extract()
+        if next_day:
+            yield Request(self.host + next_day[0], callback=self.parse)
