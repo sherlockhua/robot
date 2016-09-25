@@ -16,3 +16,4 @@ class RobotItem(scrapy.Item):
     voteCount = scrapy.Field()
     content = scrapy.Field()
     link = scrapy.Field()
+    pic = scrapy.Field()

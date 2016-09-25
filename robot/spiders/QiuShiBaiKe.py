@@ -13,7 +13,12 @@ class QiuShiBaiKeSpider(BaseSpider):
 
     name = "QiuShiBaiKe"
     allowed_domains = ["www.qiushibaike.com"]
-    start_urls = ["http://www.qiushibaike.com/history/"]
+    start_urls = ["http://www.qiushibaike.com/history/", 
+            "http://www.qiushibaike.com/", 
+            "http://www.qiushibaike.com/hot/", 
+            "http://www.qiushibaike.com/imgrank/", 
+            "http://www.qiushibaike.com/text/"]
+
     host = "http://www.qiushibaike.com"
 
     def parse(self, response):
@@ -23,13 +28,26 @@ class QiuShiBaiKeSpider(BaseSpider):
         for content in contents:
             item = RobotItem()
             result = content.xpath('.//a/div/span/text()').extract()
-            item['content'] = result[0]
-            item['voteCount'] = content.xpath('.//div[@class="stats"]/span[@class="stats-vote"]/i/text()').extract()[0]
-            item['link'] = content.xpath('.//a[@class="contentHerf"]/@href').extract()[0]
+            if result:
+                item['content'] = result[0]
+
+            pic = content.xpath('.//div[@class="thumb"]/a/img/@src').extract()
+            if pic:
+                item["pic"] = pic[0]
+                print "------------%s" % pic[0]
+
+            vote = content.xpath('.//div[@class="stats"]/span[@class="stats-vote"]/i/text()').extract()
+            if vote:
+                item['voteCount'] = vote[0]
+
+            link = content.xpath('.//a[@class="contentHerf"]/@href').extract()
+            if link:
+                item['link'] = link[0]
+
             count = content.xpath('.//div[@class="stats"]/span[@class="stats-comments"]/a/i/text()').extract()
-            item['commentCount'] = 0
             if count:
                 item['commentCount'] = count[0]
+
             yield item
 
         sellink = Selector(response)
