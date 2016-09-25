@@ -11,15 +11,10 @@ import re
 
 class QiuShiBaiKeSpider(BaseSpider):
 
-    name = "QiuShiBaiKe"
-    allowed_domains = ["www.qiushibaike.com"]
-    start_urls = ["http://www.qiushibaike.com/history/", 
-            "http://www.qiushibaike.com/", 
-            "http://www.qiushibaike.com/hot/", 
-            "http://www.qiushibaike.com/imgrank/", 
-            "http://www.qiushibaike.com/text/"]
-
-    host = "http://www.qiushibaike.com"
+    name = "Tieba"
+    allowed_domains = ["tieba.baidu.com"]
+    start_urls = ["http://tieba.baidu.com/f?kw=%E7%AC%91%E8%AF%9D&ie=utf-8"] 
+    host = "http://tieba.baidu.com"
 
     def parse(self, response):
 
@@ -34,6 +29,7 @@ class QiuShiBaiKeSpider(BaseSpider):
             pic = content.xpath('.//div[@class="thumb"]/a/img/@src').extract()
             if pic:
                 item["pic"] = pic[0]
+                print "------------%s" % pic[0]
 
             vote = content.xpath('.//div[@class="stats"]/span[@class="stats-vote"]/i/text()').extract()
             if vote:
