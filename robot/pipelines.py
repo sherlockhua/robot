@@ -7,6 +7,7 @@
 
 import string
 import json
+import psycopg2
 
 class RobotPipeline(object):
 
@@ -14,15 +15,15 @@ class RobotPipeline(object):
         self.pg_uri = pg_uri
         self.pg_database = pg_database
 
-    def open_spider(self, spider):
-        self.client = psycopg2.connect(database="robot_content", 
-                user="robot_koala", 
-                password="robot_koala", 
-                host="localhost", 
-                port="5432")
+    #def open_spider(self, spider):
+    #    self.client = psycopg2.connect(database="robot_content", 
+    #            user="robot_koala", 
+    #            password="robot_koala", 
+    #            host="localhost", 
+    #            port="5432")
 
-    def close_spider(self, spider):
-        self.client.close()
+    #def close_spider(self, spider):
+    #    self.client.close()
 
     def process_item(self, item, spider):
         if (string.atoi(item['commentCount']) > 60):

@@ -19,39 +19,7 @@ class QiuShiBaiKeSpider(BaseSpider):
     def parse(self, response):
 
         sel = Selector(response)
-        contents = sel.xpath('//div[@class="article block untagged mb15"]')
-        for content in contents:
-            item = RobotItem()
-            result = content.xpath('.//a/div/span/text()').extract()
-            if result:
-                item['content'] = result[0]
-
-            pic = content.xpath('.//div[@class="thumb"]/a/img/@src').extract()
-            if pic:
-                item["pic"] = pic[0]
-                print "------------%s" % pic[0]
-
-            vote = content.xpath('.//div[@class="stats"]/span[@class="stats-vote"]/i/text()').extract()
-            if vote:
-                item['voteCount'] = vote[0]
-
-            link = content.xpath('.//a[@class="contentHerf"]/@href').extract()
-            if link:
-                item['link'] = link[0]
-
-            count = content.xpath('.//div[@class="stats"]/span[@class="stats-comments"]/a/i/text()').extract()
-            if count:
-                item['commentCount'] = count[0]
-
-            yield item
-
-        sellink = Selector(response)
-        pages = sellink.xpath('//ul[@class="pagination"]/li')
-        for page in pages:
-            link = page.xpath('.//a/@href').extract()
-            if link:
-                yield Request(self.host + link[0], callback=self.parse)
-
-        next_day = sellink.xpath('//div[@class="history-nv mb15 clearfix"]/a/@href').extract()
-        if next_day:
-            yield Request(self.host + next_day[0], callback=self.parse)
+        thread_list = sel.xpath('//ul[@id="thread_list"]/li')
+        print thread_list
+        for thread in thread_list:
+            print thread
