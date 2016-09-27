@@ -19,7 +19,8 @@ class QiuShiBaiKeSpider(BaseSpider):
     def parse(self, response):
 
         sel = Selector(response)
-        thread_list = sel.xpath('//ul[@id="thread_list"]/li')
+        thread_list = sel.xpath('//li[@class=" j_thread_list clearfix"]')
+        print "aaa"
         print thread_list
         for thread in thread_list:
             print thread

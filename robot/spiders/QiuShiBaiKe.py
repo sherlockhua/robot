@@ -35,17 +35,17 @@ class QiuShiBaiKeSpider(BaseSpider):
             if pic:
                 item["pic"] = pic[0]
 
-            vote = content.xpath('.//div[@class="stats"]/span[@class="stats-vote"]/i/text()').extract()
-            if vote:
-                item['voteCount'] = vote[0]
+            star = content.xpath('.//div[@class="stats"]/span[@class="stats-vote"]/i/text()').extract()
+            if star:
+                item['star_count'] = star[0]
 
             link = content.xpath('.//a[@class="contentHerf"]/@href').extract()
             if link:
-                item['link'] = link[0]
+                item['href'] = link[0]
 
             count = content.xpath('.//div[@class="stats"]/span[@class="stats-comments"]/a/i/text()').extract()
             if count:
-                item['commentCount'] = count[0]
+                item['comment_count'] = count[0]
 
             yield item
 
