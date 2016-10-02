@@ -123,9 +123,8 @@ class TiebaSpider(BaseSpider):
         if (len(text_list) <= 0 or len(text_list[0]) < self.__min_post_word_count):
             return  "", "", False
 
-        post_id_list = content_list.xpath('.//@id').extract()
+        post_id_list = post.xpath('.//div/div/cc/div[@class="d_post_content j_d_post_content "]/@id')
         if (len(post_id_list) <= 0):
-            print "ERROR------------------------WARN"
             return "", "", False
 
         return text_list[0], post_id_list[0], True
