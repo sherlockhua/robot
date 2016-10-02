@@ -35,8 +35,9 @@ class RobotPipeline(object):
         try:
             cur.execute(
                     'insert into rb_content(title, content, source_author, source_uri, \
-                    source_url, source)values(%s, %s, %s, %s, %s, %s) ON CONFLICT (unique_id) do nothing', \
-                    (item['title'], item['content'], item['author'], item['uri'], item['url'], 'tieba'))
+                    source_url, source, unique_id)values(%s, %s, %s, %s, %s, %s, %s) ON \
+                    CONFLICT (unique_id) do nothing', (item['title'], item['content'], \
+                    item['author'], item['uri'], item['url'], 'tieba', item['post_id']))
             self.client.commit()
         except:
             self.client.rollback()

@@ -86,7 +86,7 @@ class TiebaSpider(BaseSpider):
             item['author'] = author
             item['title'] = title
             item['uri'] = uri
-            item['post_id'] = self.host + post_id
+            item['post_id'] = self.Name + '.' + post_id
             yield item
 
         page_list = sel.xpath('//li[@class="l_pager pager_theme_5 pb_list_pager"]/a/@href').extract()
@@ -124,7 +124,8 @@ class TiebaSpider(BaseSpider):
             return  "", "", False
 
         post_id_list = content_list.xpath('.//@id').extract()
-        if (len(post_id_list) < 0):
+        if (len(post_id_list) <= 0):
+            print "ERROR------------------------WARN"
             return "", "", False
 
         return text_list[0], post_id_list[0], True
