@@ -86,7 +86,7 @@ class TiebaSpider(BaseSpider):
             item['author'] = author
             item['title'] = title
             item['uri'] = uri
-            item['post_id'] = self.Name + '.' + post_id
+            item['post_id'] = self.name + '.' + post_id
             yield item
 
         page_list = sel.xpath('//li[@class="l_pager pager_theme_5 pb_list_pager"]/a/@href').extract()
