@@ -17,3 +17,11 @@ class RobotItem(scrapy.Item):
     content = scrapy.Field()
     href = scrapy.Field()
     pic = scrapy.Field()
+    
+class TiebaItem(scrapy.Item):
+    content = scrapy.Field()
+    uri = scrapy.Field()
+    author = scrapy.Field()
+    title = scrapy.Field()
+    url = scrapy.Field()
+    post_id = scrapy.Field()

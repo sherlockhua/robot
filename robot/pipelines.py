@@ -18,7 +18,7 @@ class RobotPipeline(object):
 
     def open_spider(self, spider):
         try:
-            self.client = psycopg2.connect(database="robot_content", 
+            self.client = psycopg2.connect(database="robot", 
                 user="robot_koala", 
                 password="robot_koala", 
                 host="localhost", 
@@ -30,15 +30,13 @@ class RobotPipeline(object):
         self.client.close()
 
     def process_item(self, item, spider):
-        if (string.atoi(item['comment_count']) < 60):
-            return item
 
         cur = self.client.cursor()
         try:
             cur.execute(
-                    'insert into rb_content(content, href, source, star_count, \
-                    comment_count)values(%s, %s, %s, %s, %s)', (item['content'], \
-                    item['href'], "qiushibaike", item['star_count'], item['comment_count']))
+                    'insert into rb_content(title, content, source_author, source_uri, \
+                    source_url, source)values(%s, %s, %s, %s, %s, %s) ON CONFLICT (unique_id) do nothing', \
+                    (item['title'], item['content'], item['author'], item['uri'], item['url'], 'tieba'))
             self.client.commit()
         except:
             self.client.rollback()
