@@ -8,6 +8,7 @@ from scrapy.http import Request
 from scrapy.selector import Selector
 from robot.items import TiebaItem
 from urlparse import urlparse
+from scrapy import log
 import re
 import string
 
