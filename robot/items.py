@@ -25,3 +25,4 @@ class TiebaItem(scrapy.Item):
     title = scrapy.Field()
     url = scrapy.Field()
     post_id = scrapy.Field()
+    category = scrapy.Field()
