@@ -31,7 +31,7 @@ class TiebaSpider(BaseSpider):
 #            "http://tieba.baidu.com/f?ie=utf-8&kw=%E6%83%85%E6%84%9F"                       #情感吧
             ] 
     host = "http://tieba.baidu.com"
-    __max_reply_num = 100
+    __max_reply_num = 128
     __min_post_word_count = 16*3
 
     def parse(self, response):
@@ -132,7 +132,6 @@ class TiebaSpider(BaseSpider):
         if ok == False:
             return "", "", "", False
 
-        print "--------------post_id:%s-----------" % post_id
         return author, content, post_id, True
 
     def parse_post_content(self, post):
@@ -143,11 +142,30 @@ class TiebaSpider(BaseSpider):
         if (len(content_list) == 0):
             return "", "", False
 
-        text_list = content_list.xpath('./node()').extract()
-        if (len(text_list) <= 0 or len(text_list[0]) < self.__min_post_word_count):
+        node_list = content_list.xpath('./node()')
+        if (len(node_list) <= 0):
             return  "", "", False
 
-        content = '<br>'.join(text_list)
+        content = []
+        for node in node_list:
+            node_name = node.xpath('name()').extract()
+            if (len(node_name) == 0):
+                text = node.extract().strip()
+                if (len(text) ==0):
+                    continue
+                content_node = {'type':'text', 'data':text}
+                content.append(content_node)
+                continue
+            if (node_name[0].lower() == "img"):
+                image_class = node.xpath('./@class="BDE_Image"').extract()
+                if (len(image_class) == 0):
+                    continue
+                src = node.xpath('./@src').extract()
+                if len(src) == 0:
+                    continue
+                content_node = {'type':'pic', 'data':src[0]}
+                content.append(content_node)
+
         post_id_list=post.xpath('.//div/div/cc/div[@class="d_post_content j_d_post_content "]/@id').extract()
         if (len(post_id_list) <= 0):
             return "", "", False
