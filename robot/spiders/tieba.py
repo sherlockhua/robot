@@ -148,6 +148,7 @@ class TiebaSpider(BaseSpider):
             return  "", "", has_image, False
 
         content = []
+        content_len = 0
         last_node_type=0
         for node in node_list:
             node_name = node.xpath('name()').extract()
@@ -158,6 +159,7 @@ class TiebaSpider(BaseSpider):
                 content_node = {'type':'text', 'data':text}
                 content.append(content_node)
                 last_node_type = 1
+                content_len += len(text)
                 continue
             if (node_name[0].lower() == "a"):
                 text_list = node.xpath('./text()').extract()
@@ -166,16 +168,17 @@ class TiebaSpider(BaseSpider):
                 text = text_list[0].strip()
                 if (len(text) == 0):
                     continue
+
+                content_len += len(text)
                 if last_node_type == 1 and len(content) > 0:
                     last_text = content[len(content)-1]
                     last_text['data'] = last_text['data'] + text
-                    content[len(content)-1] = text
                 else:
                     content_node = {'type':'text', 'data':text}
                     content.append(content_node)
 
                 last_node_type = 2
-
+                continue
             if (node_name[0].lower() == "img"):
                 image_class = node.xpath('contains(@class, "BDE_Image")').extract()
                 if (len(image_class) == 0 or image_class[0] == '0'):
@@ -187,12 +190,28 @@ class TiebaSpider(BaseSpider):
                 content_node = {'type':'pic', 'data':src[0]}
                 content.append(content_node)
                 last_node_type = 3
+                continue
+    
+            text_list = node.xpath('./text()').extract()
+            if len(text_list) == 0:
+                continue
+
+            print 'default node type:%s' % node_name[0]
+            text = text_list[0].strip()
+            if (len(text) == 0):
+                continue
+            content_len += len(text)
+            content_node = {'type':'text', 'data':src[0]}
+            content.append(content_node)
+
+        if len(content) == 0:
+            return "", "", has_image, False
 
         post_id_list=post.xpath('.//div/div/cc/div[@class="d_post_content j_d_post_content "]/@id').extract()
         if (len(post_id_list) <= 0):
             return "", "", has_image, False
 
-        if (has_image == False and len(content) <= self.__min_post_word_count):
+        if (has_image == False and content_len <= self.__min_post_word_count):
             return "", "", has_image, False
 
         return content, post_id_list[0], has_image, True
