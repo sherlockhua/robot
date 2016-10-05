@@ -25,13 +25,11 @@ class TiebaSpider(BaseSpider):
             "http://tieba.baidu.com/f?ie=utf-8&kw=%E5%86%85%E6%B6%B5%E6%AE%B5%E5%AD%90",    #内涵段子吧
             "http://tieba.baidu.com/f?ie=utf-8&kw=%E5%86%85%E6%B6%B5%E7%AC%91%E8%AF%9D",    #内涵笑话吧
             "http://tieba.baidu.com/f?ie=utf-8&kw=%E5%86%85%E6%B6%B5",                      #内涵吧
-#            "http://tieba.baidu.com/f?ie=utf-8&kw=%E6%BC%82%E4%BA%AE%E5%A5%B3%E4%BA%BA"     #漂亮女人吧
-#            "http://tieba.baidu.com/f?ie=utf-8&kw=%E6%83%85%E4%BA%BA"                       #情人吧
-#            "http://tieba.baidu.com/f?ie=utf-8&kw=%E8%82%B2%E5%84%BF"                       #育儿吧
-#            "http://tieba.baidu.com/f?ie=utf-8&kw=%E6%83%85%E6%84%9F"                       #情感吧
+            "http://tieba.baidu.com/f?ie=utf-8&kw=%E6%BC%82%E4%BA%AE%E5%A5%B3%E4%BA%BA"     #漂亮女人吧
+            "http://tieba.baidu.com/f?ie=utf-8&kw=%E8%82%B2%E5%84%BF"                       #育儿吧
             ] 
     host = "http://tieba.baidu.com"
-    __max_reply_num = 128
+    __min_reply_num = 512
     __min_post_word_count = 16*3
 
     def parse(self, response):
@@ -61,7 +59,7 @@ class TiebaSpider(BaseSpider):
             return "", False
 
         reply_num = string.atoi(reply_list[0])
-        if (reply_num < self.__max_reply_num):
+        if (reply_num < self.__min_reply_num):
             return "", False
 
         link_list = thread.xpath('.//div/div/div/div/a[@class="j_th_tit "]/@href').extract()
@@ -100,7 +98,7 @@ class TiebaSpider(BaseSpider):
 
         post_list = sel.xpath('//div[@class="l_post l_post_bright j_l_post clearfix  "]')
         for post in post_list:
-            author, content, post_id, ok = self.parse_post(post)
+            author, content, post_id, has_image, ok = self.parse_post(post)
             if ok == False:
                 continue
             item = TiebaItem()
@@ -111,6 +109,7 @@ class TiebaSpider(BaseSpider):
             item['uri'] = uri
             item['post_id'] = self.name + '.' + post_id
             item['category'] = category
+            item['has_image'] = has_image
             yield item
 
         page_list = sel.xpath('//li[@class="l_pager pager_theme_5 pb_list_pager"]/a/@href').extract()
@@ -120,33 +119,36 @@ class TiebaSpider(BaseSpider):
             yield Request(self.host+page_link, callback = self.parse_post_list)
 
     def parse_post(self, post):
+        has_image = False
         author_wrap = post.xpath('.//div/div[@class="louzhubiaoshi_wrap"]')
         if (len(author_wrap) == 0):
-            return "", "", "", False
+            return "", "", "", has_image, False
         author_list = author_wrap.xpath('.//div/@author').extract()
         if (len(author_list) == 0):
-            return "", "", "", False
+            return "", "", "", has_image, False
 
         author = author_list[0]
-        content, post_id, ok = self.parse_post_content(post)
+        content, post_id, has_image, ok = self.parse_post_content(post)
         if ok == False:
-            return "", "", "", False
+            return "", "", "", has_image, False
 
-        return author, content, post_id, True
+        return author, content, post_id, has_image, True
 
     def parse_post_content(self, post):
 
+        has_image = False
         content_list = post.xpath('.//div/div/cc/div/div[@class="post_bubble_middle"]')
         if (len(content_list) == 0):
             content_list = post.xpath('.//div/div/cc/div[@class="d_post_content j_d_post_content "]')
         if (len(content_list) == 0):
-            return "", "", False
+            return "", "", has_image, False
 
         node_list = content_list.xpath('./node()')
         if (len(node_list) <= 0):
-            return  "", "", False
+            return  "", "", has_image, False
 
         content = []
+        last_node_type=0
         for node in node_list:
             node_name = node.xpath('name()').extract()
             if (len(node_name) == 0):
@@ -155,22 +157,45 @@ class TiebaSpider(BaseSpider):
                     continue
                 content_node = {'type':'text', 'data':text}
                 content.append(content_node)
+                last_node_type = 1
                 continue
+            if (node_name[0].lower() == "a"):
+                text_list = node.xpath('./text()').extract()
+                if len(text_list) == 0:
+                    continue
+                text = text_list[0].strip()
+                if (len(text) == 0):
+                    continue
+                if last_node_type == 1 and len(content) > 0:
+                    last_text = content[len(content)-1]
+                    last_text['data'] = last_text['data'] + text
+                    content[len(content)-1] = text
+                else:
+                    content_node = {'type':'text', 'data':text}
+                    content.append(content_node)
+
+                last_node_type = 2
+
             if (node_name[0].lower() == "img"):
-                image_class = node.xpath('./@class="BDE_Image"').extract()
-                if (len(image_class) == 0):
+                image_class = node.xpath('contains(@class, "BDE_Image")').extract()
+                if (len(image_class) == 0 or image_class[0] == '0'):
                     continue
                 src = node.xpath('./@src').extract()
                 if len(src) == 0:
                     continue
+                has_image = True
                 content_node = {'type':'pic', 'data':src[0]}
                 content.append(content_node)
+                last_node_type = 3
 
         post_id_list=post.xpath('.//div/div/cc/div[@class="d_post_content j_d_post_content "]/@id').extract()
         if (len(post_id_list) <= 0):
-            return "", "", False
+            return "", "", has_image, False
 
-        return content, post_id_list[0], True
+        if (has_image == False and len(content) <= self.__min_post_word_count):
+            return "", "", has_image, False
+
+        return content, post_id_list[0], has_image, True
 
 
 

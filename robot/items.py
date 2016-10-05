@@ -26,3 +26,4 @@ class TiebaItem(scrapy.Item):
     url = scrapy.Field()
     post_id = scrapy.Field()
     category = scrapy.Field()
+    has_image = scrapy.Field()
