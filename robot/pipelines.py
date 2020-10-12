@@ -24,10 +24,10 @@ class RobotPipeline(object):
 
     def open_spider(self, spider):
         try:
-            self.auth = oss2.Auth('LTAIj7uLNtL6sIvw', 'yJo44GPcDyPEdCoCiL0WeWhw9mF2J4')
+            self.auth = oss2.Auth('xxx', 'xxx')
             #self.service = oss2.Service(self.auth, 'http://oss-cn-shanghai-internal.aliyuncs.com')
             self.bucket = oss2.Bucket(self.auth, 'http://oss-cn-shanghai-internal.aliyuncs.com',
-                    '408772ac8ffe66e91ca44b0f90f52963')
+                    'xxx')
 
             self.client = psycopg2.connect(database="robot", 
                 user="robot_koala", 
